@@ -1,7 +1,7 @@
-from socket import socket
+import socket
 
 
-class MPSocket(socket):
+class MPSocket(socket.socket):
 
     BUFFER_SIZE = 4096
 
