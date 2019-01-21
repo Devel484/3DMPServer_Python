@@ -5,6 +5,9 @@ class MPSocket(socket.socket):
 
     BUFFER_SIZE = 4096
 
+    def __init__(self, **kwargs):
+        socket.socket.__init__(self, **kwargs)
+
     def receive(self):
         received_data = b''
         while True:
