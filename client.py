@@ -13,7 +13,6 @@ class Client(object):
 
     def send(self, msg: str):
         self.socket.sendall(bytes(msg.encode("utf-8")))
-        self.socket.recv()
 
 if __name__ == "__main__":
     client = Client("10.42.0.232", 11111)
