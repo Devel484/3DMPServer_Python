@@ -1,7 +1,8 @@
+import server
 
 
 def main():
-    pass
+    server.Server().start()
 
 
 if __name__ == "__main__":

@@ -1,41 +1,43 @@
-import socket
+from socket import socket, AF_INET, SOCK_STREAM
+import client_connection
 import sys
 from threading import Thread
 
 
 class Server(Thread):
 
+    PORT = 11111
+    IP = '192.168.137.154'
+
     def __init__(self):
-        # Start seperate Thread for wait_for_connection
+        # Start a second Thread for wait_for_connection
         Thread.__init__(self)
-        self.port = 11111
-        self.ip = 'localhost'
-        self.serversocket = None
 
         # Create an INET, STREAMing socket
-        self.serversocket = socket.socket(
-            socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket = socket(AF_INET, SOCK_STREAM)
         # Bind the socket to a host and port
-        self.serversocket.bind((self.ip, self.port))
+        self.server_socket.bind((self.IP, self.PORT))
         # Become a server socket
-        self.serversocket.listen(5)
+        self.server_socket.listen(5)
 
     def run(self):
         self.wait_for_connection()
 
     def wait_for_connection(self):
-        while 1:
+        while True:
+            print('Search connection...')
             # Accept connection from outside
-            (clientsocket, address) = self.serversocket.accept()
-            with clientsocket:
-                print('Connected by ', address)
-                while True:
-                    data = clientsocket.recv(1024)
-                    if not data:
-                        break
+            client_socket, address = self.server_socket.accept()
+            print(client_socket, address)
+
+            # Create a new ClientConnection
+            client_connection.ClientConnection(client_socket)
 
     def on_gamedata(self, client_connection):
         pass
 
     def send_gamedata(self):
+        pass
+
+    def on_disconnect(self):
         pass

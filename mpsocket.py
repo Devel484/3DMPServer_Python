@@ -5,16 +5,17 @@ class MPSocket(socket.socket):
 
     BUFFER_SIZE = 4096
 
-    def receive(self):
-        received_data = b''
+    @staticmethod
+    def receive(conn):
+        received_data = ""
         while True:
-            piece = self.recv(MPSocket.BUFFER_SIZE)
-            received_data += piece
-            if len(piece) < MPSocket.BUFFER_SIZE:
-                return received_data
-
-    def accept(self):
-        obj, address = socket.socket.accept(self)
-        obj.__class__ = MPSocket
-        return obj, address
-
+            piece = str(conn.recv(MPSocket.BUFFER_SIZE))
+            find = piece.find("\\x00")
+            if find != -1:
+                received_data += piece[:find]
+                on_message(received_data)
+                received_data = piece[find:]
+            else:
+                received_data += piece
+            #if len(piece) < MPSocket.BUFFER_SIZE:
+                #return received_data
