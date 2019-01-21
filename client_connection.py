@@ -1,4 +1,4 @@
-import mpsocket
+from message import Message
 from threading import Thread
 
 
@@ -13,6 +13,7 @@ class ClientConnection(Thread):
         self.client_socket.send(message)
 
     def on_message(self, message):
+        message = Message(message)
         print(message)
 
     def on_ping(self):
