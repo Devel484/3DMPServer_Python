@@ -10,7 +10,7 @@ class ClientConnection(Thread):
         self.start()
 
     def send_message(self, message):
-        self.client_socket.send(message)
+        self.client_socket.sendall(bytes((str(message)+'\0').encode("utf-8")))
 
     def on_message(self, message):
         message = Message(message)

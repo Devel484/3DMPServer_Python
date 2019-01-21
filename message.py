@@ -18,6 +18,7 @@ class Message(object):
                 return
             except:
                 pass
+
         self.type = None
         self.timestamp = None
         self.data = None
