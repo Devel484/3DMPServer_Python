@@ -11,11 +11,10 @@ class Client(Thread):
         self.ip = ip
         self.port = port
         self.socket = socket(AF_INET, SOCK_STREAM)
-        self.start()
 
     def connect(self, nickname):
         self.socket.connect((self.ip, self.port))
-
+        self.start()
         message = Message()
         message.set_type(Message.TYPE_CONNECT)
         message.set_timestamp(int(time.time()*1000))
@@ -23,6 +22,7 @@ class Client(Thread):
         client.send(message)
 
     def send(self, msg):
+        print(str(msg))
         self.socket.sendall(bytes((str(msg)+'\0').encode("utf-8")))
 
     def on_message(self, msg):
@@ -60,4 +60,11 @@ class Client(Thread):
 if __name__ == "__main__":
     client = Client("192.168.137.154", 11111)
     client.connect("Devel484")
+
+    message = Message()
+    message.set_type(Message.TYPE_PING)
+    message.set_timestamp(int(time.time()*1000))
+    message.set_data({"pong": True})
+
+    client.send(message)
 
