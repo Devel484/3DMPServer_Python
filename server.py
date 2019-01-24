@@ -14,7 +14,7 @@ class Server(Thread):
         Thread.__init__(self)
 
         # Dict containing all connections with nicknames
-        self.conn_dict = None
+        self.conn_dict = dict()
 
         # Create an INET, STREAMing socket
         self.server_socket = socket(AF_INET, SOCK_STREAM)
@@ -44,7 +44,7 @@ class Server(Thread):
         pass
 
     def on_connect(self, client_connection, nickname):
-        if nickname not in self.conn_dict.value():
+        if not self.conn_dict or nickname not in self.conn_dict.values():
             self.conn_dict[client_connection] = nickname
         client_connection.set_nickname(nickname)
 
