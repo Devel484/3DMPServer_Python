@@ -17,8 +17,9 @@ class Server(Thread):
         self.server_socket = socket(AF_INET, SOCK_STREAM)
         # Bind the socket to a host and port
         self.server_socket.bind((self.IP, self.PORT))
-        # Become a server socket
+        # Put socket into listening mode (become a server socket)
         self.server_socket.listen(5)
+        print("Socket successfully created.")
 
     def run(self):
         self.wait_for_connection()
@@ -31,7 +32,7 @@ class Server(Thread):
             print(client_socket, address)
 
             # Create a new ClientConnection
-            client_connection.ClientConnection(client_socket)
+            client_connection.ClientConnection(self, client_socket)
 
     def on_gamedata(self, client_connection):
         pass
@@ -39,5 +40,6 @@ class Server(Thread):
     def send_gamedata(self):
         pass
 
-    def on_disconnect(self):
-        pass
+    def on_disconnect(self, client_connection):
+        del client_connection
+        print("Client disconnected.")

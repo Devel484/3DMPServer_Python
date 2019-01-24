@@ -8,10 +8,10 @@ class Message(object):
     TYPE_DISCONNECT = 'disconnect'
     TYPE_GAMEDATA = 'gamedata'
 
-    def __init__(self, message=None):
-        if message:
+    def __init__(self, msg=None):
+        if msg:
             try:
-                message = json.loads(message)
+                message = json.loads(msg)
                 self.type = message["type"]
                 self.timestamp = message["timestamp"]
                 self.data = message["data"]
@@ -19,17 +19,18 @@ class Message(object):
             except:
                 pass
 
+        self.client = None
         self.type = None
         self.timestamp = None
         self.data = None
 
     def __repr__(self):
-        message = {
+        msg = {
             "type": self.type,
             "timestamp": self.timestamp,
             "data": self.data
         }
-        return json.dumps(message)
+        return json.dumps(msg)
 
     def get_type(self):
         return self.type

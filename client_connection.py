@@ -1,26 +1,49 @@
 from message import Message
 from threading import Thread
+import time
 
 
 class ClientConnection(Thread):
 
-    def __init__(self, client_socket):
+    # message   : Class message
+    # msg       : Received Data
+
+    def __init__(self, server, client_socket):
         Thread.__init__(self)
+        self.server = server
         self.client_socket = client_socket
         self.start()
 
     def send_message(self, message):
         self.client_socket.sendall(bytes((str(message)+'\0').encode("utf-8")))
 
-    def on_message(self, message):
-        message = Message(message)
+    def on_message(self, msg):
+        message = Message(msg)
         print(message)
+        msg_type = message.get_type()
+
+        # Check for msg_type
+        if msg_type == message.TYPE_PING:
+            self.on_ping()
+        elif msg_type == message.TYPE_DISCONNECT:
+            self.on_disconnect()
+        elif msg_type == message.TYPE_TIMEOUT:
+            self.on_timeout()
+        elif msg_type == message.TYPE_GAMEDATA:
+            self.on_gamedata()
 
     def on_ping(self):
-        pass
+        # Create and send pong message
+        message = Message()
+        message.set_type(message.TYPE_PING)
+        message.set_timestamp(int(time.time()*1000))
+        message.set_data({"pong": True})
+        self.send_message(message)
 
     def on_disconnect(self):
-        pass
+        # Close connection
+        self.client_socket.close()
+        self.server.on_disconnect(self)
 
     def on_timeout(self):
         pass
