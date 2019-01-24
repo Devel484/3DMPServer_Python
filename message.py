@@ -60,7 +60,7 @@ class Message(object):
             "type": self.type,
             "timestamp": self.timestamp,
             "data": self.data,
-            "source": self.source
+            "source": self.source.get_nickname()
         }
         return json.dumps(msg)
 

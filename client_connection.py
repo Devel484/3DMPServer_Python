@@ -131,6 +131,9 @@ class ClientConnection(Thread):
     def set_nickname(self, nickname):
         self.nickname = nickname
 
+    def get_nickname(self):
+        return self.nickname
+
     def run(self):
         """
         This functions starts a loop which checks if data was received and append data pieces together til a full
