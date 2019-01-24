@@ -38,7 +38,10 @@ class Message(object):
         self.type = None
         self.timestamp = None
         self.data = None
+        self.nickname = ""
         self.source = source
+        if source:
+            self.nickname = self.source.get_nickname()
 
         if msg:
             try:
@@ -60,7 +63,7 @@ class Message(object):
             "type": self.type,
             "timestamp": self.timestamp,
             "data": self.data,
-            "source": self.source.get_nickname()
+            "source": self.nickname
         }
         return json.dumps(msg)
 
