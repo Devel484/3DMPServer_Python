@@ -38,7 +38,7 @@ class Message(object):
         self.type = None
         self.timestamp = None
         self.data = None
-        self.nickname = ""
+        self.nickname = None
         self.source = source
         if source:
             self.nickname = self.source.get_nickname()

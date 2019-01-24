@@ -102,7 +102,6 @@ class ClientConnection(Thread):
         message = Message()
         message.set_type(message.TYPE_PING)
         message.set_timestamp(int(time.time()*1000))
-        message.set_data({"pong": True})
         self.send_message(message)
 
     def on_timeout(self):
