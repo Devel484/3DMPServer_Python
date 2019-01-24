@@ -8,6 +8,7 @@ class ClientConnection(Thread):
     ClientConnection represents a socket connection to one client/player
     """
 
+    # == INFO ==
     # message   : Class message
     # msg       : Received Data
 
@@ -125,7 +126,11 @@ class ClientConnection(Thread):
         :type exception: Exception
         :return: None
         """
-        pass
+        message = Message()
+        message.set_type(message.TYPE_ERROR)
+        message.set_timestamp(int(time.time() * 1000))
+        message.set_data(exception)
+        self.send_message(message)
 
     def set_nickname(self, nickname):
         self.nickname = nickname
