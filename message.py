@@ -7,11 +7,13 @@ class Message(object):
     TYPE_TIMEOUT = 'timeout'
     TYPE_DISCONNECT = 'disconnect'
     TYPE_GAMEDATA = 'gamedata'
+    TYPE_CONNECT = 'connect'
 
     def __init__(self, msg=None):
         if msg:
             try:
                 message = json.loads(msg)
+                self.nickname = message["nickname"]
                 self.type = message["type"]
                 self.timestamp = message["timestamp"]
                 self.data = message["data"]
@@ -19,7 +21,7 @@ class Message(object):
             except:
                 pass
 
-        self.client = None
+        self.nickname = None
         self.type = None
         self.timestamp = None
         self.data = None
@@ -31,6 +33,12 @@ class Message(object):
             "data": self.data
         }
         return json.dumps(msg)
+
+    def get_nickname(self):
+        return self.nickname
+
+    def set_nickname(self, nickname):
+        self.nickname = nickname
 
     def get_type(self):
         return self.type

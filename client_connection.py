@@ -12,6 +12,7 @@ class ClientConnection(Thread):
         Thread.__init__(self)
         self.server = server
         self.client_socket = client_socket
+        self.nickname = None
         self.start()
 
     def send_message(self, message):
@@ -23,14 +24,24 @@ class ClientConnection(Thread):
         msg_type = message.get_type()
 
         # Check for msg_type
-        if msg_type == message.TYPE_PING:
-            self.on_ping()
+        if msg_type == message.TYPE_CONNECT:
+            self.on_connect(message.get_nickname())
         elif msg_type == message.TYPE_DISCONNECT:
             self.on_disconnect()
+        elif msg_type == message.TYPE_PING:
+            self.on_ping()
         elif msg_type == message.TYPE_TIMEOUT:
             self.on_timeout()
         elif msg_type == message.TYPE_GAMEDATA:
             self.on_gamedata()
+
+    def on_connect(self, nickname):
+        self.nickname = nickname
+
+    def on_disconnect(self):
+        # Close connection
+        self.client_socket.close()
+        self.server.on_disconnect(self)
 
     def on_ping(self):
         # Create and send pong message
@@ -39,11 +50,6 @@ class ClientConnection(Thread):
         message.set_timestamp(int(time.time()*1000))
         message.set_data({"pong": True})
         self.send_message(message)
-
-    def on_disconnect(self):
-        # Close connection
-        self.client_socket.close()
-        self.server.on_disconnect(self)
 
     def on_timeout(self):
         pass

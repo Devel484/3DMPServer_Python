@@ -1,5 +1,5 @@
 from socket import socket, AF_INET, SOCK_STREAM
-import client_connection
+from client_connection import ClientConnection
 import sys
 from threading import Thread
 
@@ -32,7 +32,7 @@ class Server(Thread):
             print(client_socket, address)
 
             # Create a new ClientConnection
-            client_connection.ClientConnection(self, client_socket)
+            ClientConnection(self, client_socket)
 
     def on_gamedata(self, client_connection):
         pass
