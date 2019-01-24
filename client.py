@@ -21,7 +21,6 @@ if __name__ == "__main__":
     client.connect()
 
     message = Message()
-    message.set_nickname("nicky")
     message.set_type(Message.TYPE_PING)
     message.set_timestamp(int(time.time()*1000))
     message.set_data({"ping": True})

@@ -13,6 +13,9 @@ class Server(Thread):
         # Start a second Thread for wait_for_connection
         Thread.__init__(self)
 
+        # Dict containing all connections with nicknames
+        self.conn_dict = None
+
         # Create an INET, STREAMing socket
         self.server_socket = socket(AF_INET, SOCK_STREAM)
         # Bind the socket to a host and port
@@ -40,6 +43,12 @@ class Server(Thread):
     def send_gamedata(self):
         pass
 
+    def on_connect(self, client_connection, nickname):
+        if nickname not in self.conn_dict.value():
+            self.conn_dict[client_connection] = nickname
+        client_connection.set_nickname(nickname)
+
     def on_disconnect(self, client_connection):
+        self.conn_dict.pop(client_connection)
         del client_connection
         print("Client disconnected.")

@@ -1,4 +1,4 @@
-from message import Message, UnknownMessageTypeException, WrongJSONFormatException
+from message import Message, UnknownMessageTypeException, WrongJSONFormatException, ConnectingException
 from threading import Thread
 import time
 
@@ -43,26 +43,35 @@ class ClientConnection(Thread):
         :return: None
         """
         try:
-            message = Message(msg)
+            message = Message(msg, self)
             print(message)
             msg_type = message.get_type()
 
             # Check for msg_type
-            if msg_type == message.TYPE_CONNECT:
-                self.on_connect(message.get_nickname())
-            elif msg_type == message.TYPE_DISCONNECT:
-                self.on_disconnect()
-            elif msg_type == message.TYPE_PING:
-                self.on_ping()
-            elif msg_type == message.TYPE_TIMEOUT:
-                self.on_timeout()
-            elif msg_type == message.TYPE_GAMEDATA:
-                self.on_gamedata()
+            if self.nickname is None and msg_type == message.TYPE_CONNECT:
+                self.on_connect(message.get_data())
+            elif self.nickname is None and msg_type != message.TYPE_CONNECT:
+                raise ConnectingException("Connecting not completed [Nickname not set]:\n"+str(message))
+            elif self.nickname is not None and msg_type == message.TYPE_CONNECT:
+                raise ConnectingException("Connecting already completed [Nickname already set]:\n"+str(message))
             else:
-                raise UnknownMessageTypeException("Unknown type of message:\n"+str(message))
+                if msg_type == message.TYPE_CONNECT:
+                    self.on_connect(message.get_data())
+                elif msg_type == message.TYPE_DISCONNECT:
+                    self.on_disconnect()
+                elif msg_type == message.TYPE_PING:
+                    self.on_ping()
+                elif msg_type == message.TYPE_TIMEOUT:
+                    self.on_timeout()
+                elif msg_type == message.TYPE_GAMEDATA:
+                    self.on_gamedata()
+                else:
+                    raise UnknownMessageTypeException("Unknown type of message:\n"+str(message))
         except UnknownMessageTypeException as e:
             self.on_error(e)
         except WrongJSONFormatException as e:
+            self.on_error(e)
+        except ConnectingException as e:
             self.on_error(e)
 
     def on_connect(self, nickname):
@@ -72,7 +81,7 @@ class ClientConnection(Thread):
         :type nickname: str
         :return: None
         """
-        self.nickname = nickname
+        self.server.on_connect(self, nickname)
 
     def on_disconnect(self):
         """
@@ -118,6 +127,9 @@ class ClientConnection(Thread):
         :return: None
         """
         pass
+
+    def set_nickname(self, nickname):
+        self.nickname = nickname
 
     def run(self):
         """

@@ -9,6 +9,10 @@ class WrongJSONFormatException(Exception):
     pass
 
 
+class ConnectingException(Exception):
+    pass
+
+
 class Message(object):
     """
     Message is used to represent information to be transmitted between the client connections.
@@ -19,29 +23,33 @@ class Message(object):
     TYPE_DISCONNECT = 'disconnect'
     TYPE_GAMEDATA = 'gamedata'
     TYPE_CONNECT = 'connect'
+    TYPE_ERROR = 'error'
 
-    def __init__(self, msg=None):
+
+    def __init__(self, msg=None, source=None):
         """
         Create an instance of message. If parameter msg is provided with a UTF-8 JSON string, the data will be
         extracted. If not possible all variables are set to none.
         :param msg: UTF-8 JSON str
         :type msg: str
+        :param source: Source Client Connection (if None source is server)
+        :type source: ClientConnection
         """
-        if msg:
-            try:
-                message = json.loads(msg)
-                self.nickname = message["nickname"]
-                self.type = message["type"]
-                self.timestamp = message["timestamp"]
-                self.data = message["data"]
-                return
-            except json.decoder.JSONDecodeError:
-                raise WrongJSONFormatException("Message is not correct formatted:\n"+message)
-
-        self.nickname = None
         self.type = None
         self.timestamp = None
         self.data = None
+        self.source = source
+
+        if msg:
+            try:
+                message = json.loads(msg)
+                self.type = message["type"]
+                self.timestamp = message["timestamp"]
+                self.data = message["data"]
+            except json.decoder.JSONDecodeError:
+                raise WrongJSONFormatException("Message is not correct formatted:\n"+msg)
+            except KeyError:
+                raise WrongJSONFormatException("Required parameter is missing:\n"+msg)
 
     def __repr__(self):
         """
@@ -51,25 +59,10 @@ class Message(object):
         msg = {
             "type": self.type,
             "timestamp": self.timestamp,
-            "data": self.data
+            "data": self.data,
+            "source": self.source
         }
         return json.dumps(msg)
-
-    def get_nickname(self):
-        """
-        Get nickname of the sender client.
-        :return: Nickname
-        """
-        return self.nickname
-
-    def set_nickname(self, nickname):
-        """
-        Set nickname of the sender client.
-        :param nickname: Name
-        :type nickname: str
-        :return: None
-        """
-        self.nickname = nickname
 
     def get_type(self):
         """
