@@ -10,6 +10,11 @@ class Server(Thread):
     IP = '192.168.137.154'
 
     def __init__(self):
+        """
+        Creates a instance of Server and creates a server_socket.
+        :return: None
+        """
+
         # Start a second Thread for wait_for_connection
         Thread.__init__(self)
 
@@ -25,9 +30,17 @@ class Server(Thread):
         print("Socket successfully created.")
 
     def run(self):
+        """
+        This functions starts wait_for_connection.
+        :return: None
+        """
         self.wait_for_connection()
 
     def wait_for_connection(self):
+        """
+        This function starts a loop which checks if a new client connects to the server.
+        :return: None
+        """
         while True:
             print('Search connection...')
             # Accept connection from outside
@@ -38,21 +51,47 @@ class Server(Thread):
             ClientConnection(self, client_socket)
 
     def on_gamedata(self, client_connection):
+        """
+        This function handels messages containing game-relevant data.
+        :param client_connection: client connection
+        :type client_connection: ClientConnection
+        :return: None
+        """
         pass
 
     def send_gamedata(self):
+        """
+        Send game-relevant data.
+        :return: None
+        """
         pass
 
     def on_connect(self, client_connection, nickname):
+        """
+        This function adds the nickname of a client to the conn_dict dictionary,
+        if the nickname is valid. Otherwise return error state.
+        :param client_connection: client connection
+        :type client_connection: ClientConnection
+        :param nickname: nickname of client
+        :type nickname: str
+        :return: 0 or 1
+        """
         if not self.conn_dict or nickname not in self.conn_dict.values():
             self.conn_dict[client_connection] = nickname
-            client_connection.set_nickname(nickname)
-            # return 1
+            # client_connection.set_nickname(nickname)
+            return 1
         else:
-            client_connection.on_error("Nickname is invalid.")
-            # return 0
+            # client_connection.on_error("Nickname is invalid.")
+            return 0
 
     def on_disconnect(self, client_connection):
+        """
+        This function destroies a client_connection instance and removes the
+        conn_dict entry.
+        :param client_connection: client connection
+        :type client_connection: ClientConnection
+        :return: None
+        """
         self.conn_dict.pop(client_connection)
         del client_connection
         print("Client disconnected.")

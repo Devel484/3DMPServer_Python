@@ -67,6 +67,9 @@ class Message(object):
         }
         return json.dumps(msg)
 
+    def get_nickname(self):
+        return self.nickname
+
     def get_type(self):
         """
         Get type of the message.

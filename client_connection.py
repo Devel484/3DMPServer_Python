@@ -82,7 +82,13 @@ class ClientConnection(Thread):
         :type nickname: str
         :return: None
         """
-        self.server.on_connect(self, nickname)
+        try:
+            if self.server.on_connect(self, nickname) == 0:
+                raise ConnectingException("Nickname is invalid")
+            else:
+                self.nickname = nickname
+        except ConnectingException as e:
+            self.on_error(e)
 
     def on_disconnect(self):
         """
@@ -117,7 +123,7 @@ class ClientConnection(Thread):
         This event will be called if game date was received.
         :return: None
         """
-        pass
+
 
     def on_error(self, exception):
         """
