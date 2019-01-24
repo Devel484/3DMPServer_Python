@@ -1,4 +1,4 @@
-from message import Message
+from message import Message, UnknownMessageTypeException, WrongJSONFormatException
 from threading import Thread
 import time
 
@@ -42,21 +42,28 @@ class ClientConnection(Thread):
         :type msg: str
         :return: None
         """
-        message = Message(msg)
-        print(message)
-        msg_type = message.get_type()
+        try:
+            message = Message(msg)
+            print(message)
+            msg_type = message.get_type()
 
-        # Check for msg_type
-        if msg_type == message.TYPE_CONNECT:
-            self.on_connect(message.get_nickname())
-        elif msg_type == message.TYPE_DISCONNECT:
-            self.on_disconnect()
-        elif msg_type == message.TYPE_PING:
-            self.on_ping()
-        elif msg_type == message.TYPE_TIMEOUT:
-            self.on_timeout()
-        elif msg_type == message.TYPE_GAMEDATA:
-            self.on_gamedata()
+            # Check for msg_type
+            if msg_type == message.TYPE_CONNECT:
+                self.on_connect(message.get_nickname())
+            elif msg_type == message.TYPE_DISCONNECT:
+                self.on_disconnect()
+            elif msg_type == message.TYPE_PING:
+                self.on_ping()
+            elif msg_type == message.TYPE_TIMEOUT:
+                self.on_timeout()
+            elif msg_type == message.TYPE_GAMEDATA:
+                self.on_gamedata()
+            else:
+                raise UnknownMessageTypeException("Unknown type of message:\n"+str(message))
+        except UnknownMessageTypeException as e:
+            self.on_error(e)
+        except WrongJSONFormatException as e:
+            self.on_error(e)
 
     def on_connect(self, nickname):
         """
@@ -103,9 +110,11 @@ class ClientConnection(Thread):
         """
         pass
 
-    def on_error(self):
+    def on_error(self, exception):
         """
         This event will be called if a error happens.
+        :param exception: Raised Exception
+        :type exception: Exception
         :return: None
         """
         pass

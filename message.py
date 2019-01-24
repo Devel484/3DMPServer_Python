@@ -1,6 +1,14 @@
 import json
 
 
+class UnknownMessageTypeException(Exception):
+    pass
+
+
+class WrongJSONFormatException(Exception):
+    pass
+
+
 class Message(object):
     """
     Message is used to represent information to be transmitted between the client connections.
@@ -28,7 +36,7 @@ class Message(object):
                 self.data = message["data"]
                 return
             except json.decoder.JSONDecodeError:
-                pass
+                raise WrongJSONFormatException("Message is not correct formatted:\n"+message)
 
         self.nickname = None
         self.type = None
