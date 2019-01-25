@@ -65,7 +65,7 @@ class ClientConnection(Thread):
                 elif msg_type == message.TYPE_TIMEOUT:
                     self.on_timeout()
                 elif msg_type == message.TYPE_GAMEDATA:
-                    self.on_gamedata()
+                    self.on_gamedata(message)
                 else:
                     raise UnknownMessageTypeException("Unknown type of message:\n"+str(message))
         except UnknownMessageTypeException as e:
@@ -118,12 +118,12 @@ class ClientConnection(Thread):
         """
         pass
 
-    def on_gamedata(self):
+    def on_gamedata(self, message):
         """
         This event will be called if game date was received.
         :return: None
         """
-
+        self.server.on_gamedata(message)
 
     def on_error(self, exception):
         """

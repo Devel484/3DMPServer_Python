@@ -50,14 +50,17 @@ class Server(Thread):
             # Create a new ClientConnection
             ClientConnection(self, client_socket)
 
-    def on_gamedata(self, client_connection):
+    def on_gamedata(self, client_connection, message):
         """
         This function handels messages containing game-relevant data.
         :param client_connection: client connection
         :type client_connection: ClientConnection
+        :param message: message object
+        :type message: Message
         :return: None
         """
-        pass
+        for client in self.conn_dict:
+            pass
 
     def send_gamedata(self):
         """
@@ -76,8 +79,8 @@ class Server(Thread):
         :type nickname: str
         :return: 0 or 1
         """
-        if not self.conn_dict or nickname not in self.conn_dict.values():
-            self.conn_dict[client_connection] = nickname
+        if not self.conn_dict or nickname not in self.conn_dict.keys():
+            self.conn_dict[nickname] = client_connection
             # client_connection.set_nickname(nickname)
             return 1
         else:
@@ -92,6 +95,6 @@ class Server(Thread):
         :type client_connection: ClientConnection
         :return: None
         """
-        self.conn_dict.pop(client_connection)
+        self.conn_dict.pop(client_connection.get_nickname())
         del client_connection
         print("Client disconnected.")
