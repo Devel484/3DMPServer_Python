@@ -1,8 +1,8 @@
-import server
+from server import Server
 
 
 def main():
-    server.Server().start()
+    Server().start()
 
 
 if __name__ == "__main__":

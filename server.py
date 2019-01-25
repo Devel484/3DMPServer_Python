@@ -1,13 +1,15 @@
 from socket import socket, AF_INET, SOCK_STREAM
 from client_connection import ClientConnection
-import sys
+from message import Message
+from user_interface import UserInterface
+import time
 from threading import Thread
 
 
 class Server(Thread):
 
     PORT = 11111
-    IP = '192.168.137.154'
+    IP = '192.168.178.69'
 
     def __init__(self):
         """
@@ -17,9 +19,11 @@ class Server(Thread):
 
         # Start a second Thread for wait_for_connection
         Thread.__init__(self)
+        # Create User Interface
+        UserInterface(self)
 
         # Dict containing all connections with nicknames
-        self.conn_dict = dict()
+        self.client_dict = dict()
 
         # Create an INET, STREAMing socket
         self.server_socket = socket(AF_INET, SOCK_STREAM)
@@ -53,14 +57,20 @@ class Server(Thread):
     def on_gamedata(self, client_connection, message):
         """
         This function handels messages containing game-relevant data.
-        :param client_connection: client connection
+        :param client_connection: client connection of sender
         :type client_connection: ClientConnection
         :param message: message object
         :type message: Message
         :return: None
         """
-        for client in self.conn_dict:
-            pass
+        for client in self.client_dict:
+            if client != client_connection:
+                new_msg = Message()
+                new_msg.set_type(message.TYPE_GAMEDATA)
+                new_msg.set_nickname(message.get_nickname())
+                new_msg.set_data(message.get_data())
+                new_msg.set_timestamp(int(time.time()*1000))
+                client.send_message(new_msg)
 
     def send_gamedata(self):
         """
@@ -79,8 +89,8 @@ class Server(Thread):
         :type nickname: str
         :return: 0 or 1
         """
-        if not self.conn_dict or nickname not in self.conn_dict.keys():
-            self.conn_dict[nickname] = client_connection
+        if not self.client_dict or nickname not in self.client_dict.keys():
+            self.client_dict[nickname] = client_connection
             # client_connection.set_nickname(nickname)
             return 1
         else:
@@ -95,6 +105,29 @@ class Server(Thread):
         :type client_connection: ClientConnection
         :return: None
         """
-        self.conn_dict.pop(client_connection.get_nickname())
+        nickname = client_connection.get_nickname()
+        self.client_dict.pop(nickname)
         del client_connection
-        print("Client disconnected.")
+        print("Client '{}' disconnected.").format(nickname)
+
+    def shutdown(self):
+        for client_connection in self.client_dict:
+            # Send shutdown information to each client
+            message = Message()
+            message.set_type(message.TYPE_DISCONNECT)
+            message.set_nickname("Server")
+            message.set_data("Server goes offline")
+            message.set_timestamp(int(time.time()*1000))
+            client_connection.send_message(message)
+
+            # Close connection to each client
+            client_connection.client_socket.close()
+            nickname = client_connection.get_nickname()
+            del client_connection
+            print("Client '{}' disconnected.").format(nickname)
+
+        # NOT CORRECT!!!
+        exit()
+
+    def get_client_dict(self):
+        return self.client_dict

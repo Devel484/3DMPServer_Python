@@ -25,23 +25,22 @@ class Message(object):
     TYPE_CONNECT = 'connect'
     TYPE_ERROR = 'error'
 
-
-    def __init__(self, msg=None, source=None):
+    def __init__(self, msg=None, source_client=None):
         """
         Create an instance of message. If parameter msg is provided with a UTF-8 JSON string, the data will be
         extracted. If not possible all variables are set to none.
         :param msg: UTF-8 JSON str
         :type msg: str
-        :param source: Source Client Connection (if None source is server)
-        :type source: ClientConnection
+        :param source_client: Source Client Connection (if None source is server)
+        :type source_client: ClientConnection
         """
         self.type = None
         self.timestamp = None
         self.data = None
         self.nickname = None
-        self.source = source
-        if source:
-            self.nickname = self.source.get_nickname()
+        self.source_client = source_client
+        if source_client:
+            self.nickname = self.source_client.get_nickname()
 
         if msg:
             try:
@@ -66,6 +65,9 @@ class Message(object):
             "source": self.nickname
         }
         return json.dumps(msg)
+
+    def set_nickname(self, nickname):
+        self.nickname = nickname
 
     def get_nickname(self):
         return self.nickname

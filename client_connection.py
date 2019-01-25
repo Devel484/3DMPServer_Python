@@ -24,6 +24,7 @@ class ClientConnection(Thread):
         self.server = server
         self.client_socket = client_socket
         self.nickname = None
+        self.last_timestamp = None
         self.start()
 
     def send_message(self, message):
@@ -123,7 +124,11 @@ class ClientConnection(Thread):
         This event will be called if game date was received.
         :return: None
         """
-        self.server.on_gamedata(message)
+        timestamp = message.get_timestamp()
+        # Accept gamedata message only if it's a new one
+        if timestamp > self.last_timestamp:
+            self.last_timestamp = timestamp
+            self.server.on_gamedata(message)
 
     def on_error(self, exception):
         """
