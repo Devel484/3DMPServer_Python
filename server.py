@@ -105,29 +105,35 @@ class Server(Thread):
         :type client_connection: ClientConnection
         :return: None
         """
+        message = Message()
+        message.set_type(message.TYPE_DISCONNECT)
+        message.set_data({"reason": "to many errors"})
+        client_connection.send_message(message)
+
         nickname = client_connection.get_nickname()
-        self.client_dict.pop(nickname)
+        if nickname in self.client_dict:
+            self.client_dict.pop(nickname)
+        client_connection.client_socket.close()
         del client_connection
-        print("Client '{}' disconnected.").format(nickname)
+        print("Client '%s' disconnected." % nickname)
 
     def shutdown(self):
-        for client_connection in self.client_dict:
+        for client_connection in self.client_dict.values():
             # Send shutdown information to each client
             message = Message()
             message.set_type(message.TYPE_DISCONNECT)
-            message.set_nickname("Server")
-            message.set_data("Server goes offline")
-            message.set_timestamp(int(time.time()*1000))
+            message.set_data({"reason": "server goes offline"})
             client_connection.send_message(message)
 
+        Server.EXIT = True
+        time.sleep(0.2)
+
+        for client_connection in self.client_dict.values():
             # Close connection to each client
             client_connection.client_socket.close()
             nickname = client_connection.get_nickname()
             del client_connection
-            print("Client '{}' disconnected.").format(nickname)
-
-        Server.EXIT = True
-
+            print("Client '%s' disconnected." % nickname)
 
     def get_client_dict(self):
         return self.client_dict

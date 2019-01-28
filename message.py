@@ -20,6 +20,7 @@ class Message(object):
     """
 
     TYPE_PING = 'ping'
+    TYPE_PONG = 'pong'
     TYPE_TIMEOUT = 'timeout'
     TYPE_DISCONNECT = 'disconnect'
     TYPE_GAMEDATA = 'gamedata'
@@ -36,7 +37,7 @@ class Message(object):
         :type source_client: ClientConnection
         """
         self.type = None
-        self.timestamp = None
+        self.timestamp = int(time.time()*1000)
         self.data = None
         self.nickname = "server"
         self.source_client = source_client

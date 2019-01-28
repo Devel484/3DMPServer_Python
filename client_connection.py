@@ -1,5 +1,6 @@
 from message import Message, UnknownMessageTypeException, WrongJSONFormatException, ConnectingException
 from threading import Thread
+from socket import timeout
 import time
 
 
@@ -25,6 +26,8 @@ class ClientConnection(Thread):
         self.client_socket = client_socket
         self.nickname = None
         self.last_timestamp = None
+        self.error_count = 0
+        self.stop = False
         self.start()
 
     def send_message(self, message):
@@ -35,6 +38,7 @@ class ClientConnection(Thread):
         :type message: Message
         :return: None
         """
+        print("[OUT] %s" % message)
         self.client_socket.sendall(bytes((str(message)+'\0').encode("utf-8")))
 
     def on_message(self, msg):
@@ -46,16 +50,16 @@ class ClientConnection(Thread):
         """
         try:
             message = Message(msg, self)
-            print(message)
+            print("[IN]  %s" % message)
             msg_type = message.get_type()
 
             # Check for msg_type
             if self.nickname is None and msg_type == message.TYPE_CONNECT:
                 self.on_connect(message.get_data())
             elif self.nickname is None and msg_type != message.TYPE_CONNECT:
-                raise ConnectingException("Connecting not completed [Nickname not set]:\n"+str(message))
+                raise ConnectingException("connecting not yet completed")
             elif self.nickname is not None and msg_type == message.TYPE_CONNECT:
-                raise ConnectingException("Connecting already completed [Nickname already set]:\n"+str(message))
+                raise ConnectingException("connecting already completed")
             else:
                 if msg_type == message.TYPE_CONNECT:
                     self.on_connect(message.get_data())
@@ -68,13 +72,15 @@ class ClientConnection(Thread):
                 elif msg_type == message.TYPE_GAMEDATA:
                     self.on_gamedata(message)
                 else:
-                    raise UnknownMessageTypeException("Unknown type of message:\n"+str(message))
+                    raise UnknownMessageTypeException("unknown type of message")
         except UnknownMessageTypeException as e:
             self.on_error(e)
         except WrongJSONFormatException as e:
             self.on_error(e)
         except ConnectingException as e:
             self.on_error(e)
+        else:
+            self.error_count = 0
 
     def on_connect(self, data):
         """
@@ -86,11 +92,11 @@ class ClientConnection(Thread):
         try:
             nickname = data["nickname"]
             if not self.server.on_connect(self, nickname):
-                raise ConnectionError("change nickname")
+                raise ConnectingException("change nickname")
 
+            # Send timeout information
             self.nickname = nickname
             message = Message()
-            message.set_timestamp(int(time.time()*1000))
             message.set_type(Message.TYPE_CONNECT)
             message.set_data({"timeout": self.server.CLIENT_TIMEOUT})
             self.send_message(message)
@@ -105,7 +111,7 @@ class ClientConnection(Thread):
         :return: None
         """
         # Close connection
-        self.client_socket.close()
+        self.stop = True
         self.server.on_disconnect(self)
 
     def on_ping(self):
@@ -115,8 +121,7 @@ class ClientConnection(Thread):
         """
         # Create and send pong message
         message = Message()
-        message.set_type(message.TYPE_PING)
-        message.set_timestamp(int(time.time()*1000))
+        message.set_type(message.TYPE_PONG)
         self.send_message(message)
 
     def on_timeout(self):
@@ -144,11 +149,14 @@ class ClientConnection(Thread):
         :type exception: Exception
         :return: None
         """
-        message = Message()
-        message.set_type(message.TYPE_ERROR)
-        message.set_timestamp(int(time.time() * 1000))
-        message.set_data({"error": exception})
-        self.send_message(message)
+        if self.error_count <= 3:
+            message = Message()
+            message.set_type(message.TYPE_ERROR)
+            message.set_data({"error": exception.args[0]})
+            self.send_message(message)
+            self.error_count += 1
+        else:
+            self.on_disconnect()
 
     def set_nickname(self, nickname):
         self.nickname = nickname
@@ -163,16 +171,21 @@ class ClientConnection(Thread):
         :return: None
         """
         received_data = ""
-        while not self.server.EXIT:
-            piece = str(self.client_socket.recv(4096).decode("utf-8"))
-            if piece == '':
-                continue
-            find = piece.find('\0')
-            while find != -1:
-                received_data += piece[:find]
-                self.on_message(received_data)
-                received_data = ""
-                piece = piece[find+1:]
-                find = piece.find("\0")
-            else:
-                received_data += piece
+        while not self.server.EXIT and not self.stop:
+            try:
+                self.client_socket.settimeout(0.2)
+                piece = str(self.client_socket.recv(4096).decode("utf-8"))
+                if piece == '':
+                    continue
+                find = piece.find('\0')
+                while find != -1:
+                    received_data += piece[:find]
+                    self.on_message(received_data)
+                    received_data = ""
+                    piece = piece[find+1:]
+                    find = piece.find("\0")
+                else:
+                    received_data += piece
+
+            except timeout:
+                pass

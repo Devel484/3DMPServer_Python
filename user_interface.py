@@ -18,13 +18,13 @@ class UserInterface(Thread):
     def run(self):
         while not self.server.EXIT:
             command = input('Awaiting command...\n')
-            if command == "shutdown":
+            if command == "sh":
                 print("Shutdown server...")
                 self.server.shutdown()
-            elif command == "show clients":
+            elif command == "sc":
                 print("Active clients:")
                 client_dict = self.server.get_client_dict()
                 for nickname, client_connection in client_dict.items():
-                    print("%s -> %s" % (client_connection.client_socket.getpeername(), nickname))
+                    print("%s -> %s" % (nickname, client_connection.client_socket.getpeername()))
             else:
                 print("Unknown command.")
