@@ -76,14 +76,15 @@ class ClientConnection(Thread):
         except ConnectingException as e:
             self.on_error(e)
 
-    def on_connect(self, nickname):
+    def on_connect(self, data):
         """
         This event is called if a connection message was received.
-        :param nickname: Nickname of the connection/player
-        :type nickname: str
+        :param data: data of message
+        :type data: str
         :return: None
         """
         try:
+            nickname = data['nickname']
             if self.server.on_connect(self, nickname) == 0:
                 raise ConnectingException("Nickname is invalid")
             else:

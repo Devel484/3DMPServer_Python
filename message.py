@@ -37,7 +37,7 @@ class Message(object):
         self.type = None
         self.timestamp = None
         self.data = None
-        self.nickname = None
+        self.nickname = "server"
         self.source_client = source_client
         if source_client:
             self.nickname = self.source_client.get_nickname()
@@ -48,6 +48,7 @@ class Message(object):
                 self.type = message["type"]
                 self.timestamp = message["timestamp"]
                 self.data = message["data"]
+                self.nickname = message["nickname"]
             except json.decoder.JSONDecodeError:
                 raise WrongJSONFormatException("Message is not correct formatted:\n"+msg)
             except KeyError:

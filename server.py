@@ -9,7 +9,7 @@ from threading import Thread
 class Server(Thread):
 
     PORT = 11111
-    IP = '10.0.253.209'
+    IP = '10.42.0.232'
     EXIT = False
 
     def __init__(self):
@@ -70,12 +70,7 @@ class Server(Thread):
         """
         for client in self.client_dict:
             if client != client_connection:
-                new_msg = Message()
-                new_msg.set_type(message.TYPE_GAMEDATA)
-                new_msg.set_nickname(message.get_nickname())
-                new_msg.set_data(message.get_data())
-                new_msg.set_timestamp(int(time.time()*1000))
-                client.send_message(new_msg)
+                client.send_message(message)
 
     def send_gamedata(self):
         """
