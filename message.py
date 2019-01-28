@@ -1,4 +1,5 @@
 import json
+import time
 
 
 class UnknownMessageTypeException(Exception):
@@ -112,11 +113,13 @@ class Message(object):
         """
         return self.timestamp
 
-    def set_timestamp(self, timestamp):
+    def set_timestamp(self, timestamp=None):
         """
         Set timestamp in milliseconds as int.
         :param timestamp: ms as int
         :type timestamp: int
         :return: None
         """
+        if timestamp is None:
+            timestamp = int(time.time()*1000)
         self.timestamp = timestamp
