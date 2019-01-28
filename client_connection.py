@@ -84,11 +84,17 @@ class ClientConnection(Thread):
         :return: None
         """
         try:
-            nickname = data['nickname']
-            if self.server.on_connect(self, nickname) == 0:
-                raise ConnectingException("Nickname is invalid")
-            else:
-                self.nickname = nickname
+            nickname = data["nickname"]
+            if not self.server.on_connect(self, nickname):
+                raise ConnectionError("change nickname")
+
+            self.nickname = nickname
+            message = Message()
+            message.set_timestamp(int(time.time()*1000))
+            message.set_type(Message.TYPE_CONNECT)
+            message.set_data({"timeout": self.server.CLIENT_TIMEOUT})
+            self.send_message(message)
+
         except ConnectingException as e:
             self.on_error(e)
 
@@ -141,7 +147,7 @@ class ClientConnection(Thread):
         message = Message()
         message.set_type(message.TYPE_ERROR)
         message.set_timestamp(int(time.time() * 1000))
-        message.set_data(exception)
+        message.set_data({"error": exception})
         self.send_message(message)
 
     def set_nickname(self, nickname):

@@ -11,6 +11,7 @@ class Server(Thread):
     PORT = 11111
     IP = '192.168.137.154'
     EXIT = False
+    CLIENT_TIMEOUT = 20
 
     def __init__(self):
         """
@@ -87,15 +88,14 @@ class Server(Thread):
         :type client_connection: ClientConnection
         :param nickname: nickname of client
         :type nickname: str
-        :return: 0 or 1
+        :return: bool
         """
         if not self.client_dict or nickname not in self.client_dict.keys():
             self.client_dict[nickname] = client_connection
             # client_connection.set_nickname(nickname)
-            return 1
-        else:
+            return True
             # client_connection.on_error("Nickname is invalid.")
-            return 0
+        return False
 
     def on_disconnect(self, client_connection):
         """
