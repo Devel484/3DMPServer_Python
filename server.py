@@ -1,4 +1,4 @@
-from socket import socket, AF_INET, SOCK_STREAM
+from socket import socket, AF_INET, SOCK_STREAM, SHUT_RD, timeout
 from client_connection import ClientConnection
 from message import Message
 from user_interface import UserInterface
@@ -9,7 +9,8 @@ from threading import Thread
 class Server(Thread):
 
     PORT = 11111
-    IP = '192.168.178.69'
+    IP = '10.0.253.209'
+    EXIT = False
 
     def __init__(self):
         """
@@ -29,8 +30,6 @@ class Server(Thread):
         self.server_socket = socket(AF_INET, SOCK_STREAM)
         # Bind the socket to a host and port
         self.server_socket.bind((self.IP, self.PORT))
-        # Put socket into listening mode (become a server socket)
-        self.server_socket.listen(5)
         print("Socket successfully created.")
 
     def run(self):
@@ -45,14 +44,20 @@ class Server(Thread):
         This function starts a loop which checks if a new client connects to the server.
         :return: None
         """
-        while True:
-            print('Search connection...')
-            # Accept connection from outside
-            client_socket, address = self.server_socket.accept()
-            print(client_socket, address)
-
-            # Create a new ClientConnection
-            ClientConnection(self, client_socket)
+        print('Search connection...')
+        while not Server.EXIT:
+            try:
+                self.server_socket.settimeout(0.5)
+                # Put socket into listening mode (become a server socket)
+                self.server_socket.listen(5)
+                # Accept connection from outside
+                client_socket, address = self.server_socket.accept()
+                print(client_socket, address)
+            except timeout:
+                pass
+            else:
+                # Create a new ClientConnection
+                ClientConnection(self, client_socket)
 
     def on_gamedata(self, client_connection, message):
         """
@@ -126,8 +131,8 @@ class Server(Thread):
             del client_connection
             print("Client '{}' disconnected.").format(nickname)
 
-        # NOT CORRECT!!!
-        exit()
+        Server.EXIT = True
+
 
     def get_client_dict(self):
         return self.client_dict

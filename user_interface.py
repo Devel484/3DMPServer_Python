@@ -16,7 +16,7 @@ class UserInterface(Thread):
         self.start()
 
     def run(self):
-        while 1:
+        while not self.server.EXIT:
             command = input('Awaiting command...\n')
             if command == "shutdown":
                 print("Shutdown server...")

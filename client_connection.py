@@ -156,7 +156,7 @@ class ClientConnection(Thread):
         :return: None
         """
         received_data = ""
-        while True:
+        while not self.server.EXIT:
             piece = str(self.client_socket.recv(4096).decode("utf-8"))
             if piece == '':
                 continue
