@@ -48,7 +48,7 @@ class Message(object):
                 self.type = message["type"]
                 self.timestamp = message["timestamp"]
                 self.data = message["data"]
-                self.nickname = message["nickname"]
+                self.nickname = message["source"]
             except json.decoder.JSONDecodeError:
                 raise WrongJSONFormatException("Message is not correct formatted:\n"+msg)
             except KeyError:

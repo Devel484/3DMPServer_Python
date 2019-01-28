@@ -9,7 +9,7 @@ from threading import Thread
 class Server(Thread):
 
     PORT = 11111
-    IP = '10.42.0.232'
+    IP = '192.168.137.154'
     EXIT = False
 
     def __init__(self):

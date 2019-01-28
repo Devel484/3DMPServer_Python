@@ -25,6 +25,6 @@ class UserInterface(Thread):
                 print("Active clients:")
                 client_dict = self.server.get_client_dict()
                 for nickname, client_connection in client_dict.items():
-                    print("{} -> {}").format(client_connection.client_socket.getsockname(), nickname)
+                    print("%s -> %s" % (client_connection.client_socket.getpeername(), nickname))
             else:
                 print("Unknown command.")
