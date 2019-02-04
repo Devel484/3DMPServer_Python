@@ -52,9 +52,9 @@ class Message(object):
                 self.data = message["data"]
                 self.nickname = message["source"]
             except json.decoder.JSONDecodeError:
-                raise WrongJSONFormatException("Message is not correct formatted:\n"+msg)
+                raise WrongJSONFormatException("Message is not correct formatted")
             except KeyError:
-                raise WrongJSONFormatException("Required parameter is missing:\n"+msg)
+                raise WrongJSONFormatException("Required parameter is missing")
 
     def __repr__(self):
         """

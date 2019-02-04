@@ -9,7 +9,7 @@ from threading import Thread
 class Server(Thread):
 
     PORT = 11111
-    IP = '192.168.137.154'
+    IP = '127.0.0.1'
     EXIT = False
     CLIENT_TIMEOUT = 20
 
