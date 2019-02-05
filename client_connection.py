@@ -64,7 +64,7 @@ class ClientConnection(Thread):
                 if msg_type == message.TYPE_CONNECT:
                     self.on_connect(message.get_data())
                 elif msg_type == message.TYPE_DISCONNECT:
-                    self.on_disconnect()
+                    self.on_disconnect("client disconnected")
                 elif msg_type == message.TYPE_PING:
                     self.on_ping()
                 elif msg_type == message.TYPE_TIMEOUT:
@@ -104,15 +104,17 @@ class ClientConnection(Thread):
         except ConnectingException as e:
             self.on_error(e)
 
-    def on_disconnect(self):
+    def on_disconnect(self, reason):
         """
         This event is called if a disconnect message was received. The socket will be closed and a event another event
         on the server will be called.
+        :param reason: Reason for disconnecting
+        :type reason: String
         :return: None
         """
         # Close connection
         self.stop = True
-        self.server.on_disconnect(self)
+        self.server.on_disconnect(self, reason)
 
     def on_ping(self):
         """
@@ -156,7 +158,7 @@ class ClientConnection(Thread):
             self.send_message(message)
             self.error_count += 1
         else:
-            self.on_disconnect()
+            self.on_disconnect("to many errors")
 
     def set_nickname(self, nickname):
         self.nickname = nickname

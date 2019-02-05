@@ -97,17 +97,19 @@ class Server(Thread):
             # client_connection.on_error("Nickname is invalid.")
         return False
 
-    def on_disconnect(self, client_connection):
+    def on_disconnect(self, client_connection, reason):
         """
         This function destroies a client_connection instance and removes the
         conn_dict entry.
         :param client_connection: client connection
         :type client_connection: ClientConnection
+        :param reason: Reason for disconnecting
+        :type reason: String
         :return: None
         """
         message = Message()
         message.set_type(message.TYPE_DISCONNECT)
-        message.set_data({"reason": "to many errors"})
+        message.set_data({"reason": reason})
         client_connection.send_message(message)
 
         nickname = client_connection.get_nickname()
