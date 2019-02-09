@@ -11,7 +11,7 @@ class Server(Thread):
     PORT = 11111
     IP = '127.0.0.1'
     EXIT = False
-    CLIENT_TIMEOUT = 20
+    CLIENT_TIMEOUT = 2000
 
     def __init__(self):
         """
