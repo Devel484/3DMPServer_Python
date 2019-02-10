@@ -107,10 +107,12 @@ class Server(Thread):
         :type reason: String
         :return: None
         """
-        message = Message()
-        message.set_type(message.TYPE_DISCONNECT)
-        message.set_data({"reason": reason})
-        client_connection.send_message(message)
+        # Don't send a message to the client if he disconnected
+        if reason != "client":
+            message = Message()
+            message.set_type(message.TYPE_DISCONNECT)
+            message.set_data({"reason": reason})
+            client_connection.send_message(message)
 
         nickname = client_connection.get_nickname()
         if nickname in self.client_dict:

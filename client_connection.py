@@ -64,7 +64,7 @@ class ClientConnection(Thread):
                 if msg_type == message.TYPE_CONNECT:
                     self.on_connect(message.get_data())
                 elif msg_type == message.TYPE_DISCONNECT:
-                    self.on_disconnect("client disconnected")
+                    self.on_disconnect("client")
                 elif msg_type == message.TYPE_PING:
                     self.on_ping()
                 elif msg_type == message.TYPE_TIMEOUT:
