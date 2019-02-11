@@ -92,6 +92,8 @@ class Server(Thread):
         """
         if not self.client_dict or nickname not in self.client_dict.keys():
             self.client_dict[nickname] = client_connection
+            # Change client status
+            client_connection.set_status(client_connection.STATUS_IN_LOBBY)
             # client_connection.set_nickname(nickname)
             return True
             # client_connection.on_error("Nickname is invalid.")

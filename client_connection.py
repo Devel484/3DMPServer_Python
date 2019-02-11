@@ -13,6 +13,11 @@ class ClientConnection(Thread):
     # message   : Class message
     # msg       : Received Data
 
+    STATUS_CONNECTING = "connecting"
+    STATUS_IN_LOBBY = "in_lobby"
+    STATUS_READY = "ready"
+    STATUS_IN_GAME = "in_game"
+
     def __init__(self, server, client_socket):
         """
         Creates a instance of ClientConnection with a reference to the server and the client socket.
@@ -28,6 +33,7 @@ class ClientConnection(Thread):
         self.last_timestamp = None
         self.error_count = 0
         self.stop = False
+        self.status = self.STATUS_CONNECTING
         self.start()
 
     def send_message(self, message):
@@ -165,6 +171,12 @@ class ClientConnection(Thread):
 
     def get_nickname(self):
         return self.nickname
+
+    def get_status(self):
+        return self.status
+
+    def set_status(self, status):
+        self.status = status
 
     def run(self):
         """

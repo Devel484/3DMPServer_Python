@@ -24,6 +24,7 @@ class Message(object):
     TYPE_TIMEOUT = 'timeout'
     TYPE_DISCONNECT = 'disconnect'
     TYPE_GAMEDATA = 'gamedata'
+    TYPE_LOBBYDATA = 'lobbydata'
     TYPE_CONNECT = 'connect'
     TYPE_ERROR = 'error'
 
