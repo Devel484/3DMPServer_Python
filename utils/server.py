@@ -1,7 +1,8 @@
-from socket import socket, AF_INET, SOCK_STREAM, SHUT_RD, timeout
-from client_connection import ClientConnection
-from message import Message
-from user_interface import UserInterface
+from socket import socket, AF_INET, SOCK_STREAM, timeout
+from utils.client_connection import ClientConnection
+from utils.message import Message
+from utils.user_interface import UserInterface
+from utils.lobby import Lobby
 import time
 from threading import Thread
 
@@ -9,7 +10,7 @@ from threading import Thread
 class Server(Thread):
 
     PORT = 11111
-    IP = '127.0.0.1'
+    IP = '10.42.0.1'
     EXIT = False
     CLIENT_TIMEOUT = 2000
 
@@ -31,6 +32,8 @@ class Server(Thread):
         self.server_socket = socket(AF_INET, SOCK_STREAM)
         # Bind the socket to a host and port
         self.server_socket.bind((self.IP, self.PORT))
+
+        self.lobby = Lobby()
         print("Socket successfully created.")
 
     def run(self):
@@ -120,8 +123,14 @@ class Server(Thread):
         if nickname in self.client_dict:
             self.client_dict.pop(nickname)
         client_connection.client_socket.close()
+
+        self.lobby.remove(client_connection)
+
         del client_connection
         print("Client '%s' disconnected." % nickname)
+
+    def on_lobbydata(self, message):
+        self.lobby.on_lobbydata(message)
 
     def shutdown(self):
         for client_connection in self.client_dict.values():

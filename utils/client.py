@@ -1,5 +1,5 @@
 from socket import socket, AF_INET, SOCK_STREAM, timeout
-from message import Message
+from utils.message import Message
 from threading import Thread
 import time
 

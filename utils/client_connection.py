@@ -1,7 +1,6 @@
-from message import Message, UnknownMessageTypeException, WrongJSONFormatException, ConnectingException
+from utils.message import Message, UnknownMessageTypeException, WrongJSONFormatException, ConnectingException
 from threading import Thread
 from socket import timeout
-import time
 
 
 class ClientConnection(Thread):
@@ -77,6 +76,8 @@ class ClientConnection(Thread):
                     self.on_timeout()
                 elif msg_type == message.TYPE_GAMEDATA:
                     self.on_gamedata(message)
+                elif msg_type == message.TYPE_LOBBYDATA:
+                    self.on_lobbydata(message)
                 else:
                     raise UnknownMessageTypeException("unknown type of message")
         except UnknownMessageTypeException as e:
@@ -129,6 +130,7 @@ class ClientConnection(Thread):
         """
         # Create and send pong message
         message = Message()
+        message.set_data({})
         message.set_type(message.TYPE_PONG)
         self.send_message(message)
 
@@ -166,6 +168,9 @@ class ClientConnection(Thread):
         else:
             self.on_disconnect("to many errors")
 
+    def on_lobbydata(self, message):
+        self.server.on_lobbydata(message)
+
     def set_nickname(self, nickname):
         self.nickname = nickname
 
@@ -202,4 +207,6 @@ class ClientConnection(Thread):
                     received_data += piece
 
             except timeout:
+                pass
+            except ConnectionResetError:
                 pass

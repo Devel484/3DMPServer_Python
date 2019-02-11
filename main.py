@@ -1,4 +1,4 @@
-from server import Server
+from utils.server import Server
 
 
 def main():
