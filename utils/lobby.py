@@ -59,16 +59,17 @@ class Lobby(object):
         """
 
         data {
-            "nickname 1" : {
-                "ready": True
-            }
+            "0": {},
+            "1: {},
+            "start": True/False
         }
 
         :return:
         """
 
         status = dict()
-        slot = 1
+        all_ready = True
+        slot = 0
 
         for lobby_client in self.clients.values():
             client = lobby_client.get_client()
@@ -77,7 +78,12 @@ class Lobby(object):
             client_values["nickname"] = client.get_nickname()
             client_values["ready"] = lobby_client.is_ready()
 
+            if not lobby_client.is_ready:
+                all_ready = False
+
             status[slot] = client_values
+
+        status["start"] = all_ready
 
         message = Message()
         message.set_data(status)
