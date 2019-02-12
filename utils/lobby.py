@@ -67,18 +67,20 @@ class Lobby(object):
         :return:
         """
 
-        status = []
+        status = dict()
+        slot = 1
 
         for lobby_client in self.clients.values():
             client = lobby_client.get_client()
 
-            status.append({
-                "nickname": client.get_nickname(),
-                "ready": lobby_client.is_ready()
-            })
+            client_values = dict()
+            client_values["nickname"] = client.get_nickname()
+            client_values["ready"] = lobby_client.is_ready()
+
+            status[slot] = client_values
 
         message = Message()
-        message.set_data({"test": True})
+        message.set_data(status)
         message.set_type(Message.TYPE_LOBBYDATA)
 
         for lobby_client in self.clients.values():
