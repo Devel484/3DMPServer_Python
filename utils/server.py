@@ -10,9 +10,9 @@ from threading import Thread
 class Server(Thread):
 
     PORT = 11111
-    IP = '127.0.0.1'
+    IP = '10.0.253.209'
     EXIT = False
-    CLIENT_TIMEOUT = 2000
+    CLIENT_TIMEOUT = 10 * 1000
 
     def __init__(self):
         """
