@@ -78,7 +78,7 @@ class Lobby(object):
             client_values["nickname"] = client.get_nickname()
             client_values["ready"] = lobby_client.is_ready()
 
-            if not lobby_client.is_ready:
+            if not lobby_client.is_ready():
                 all_ready = False
 
             status[slot] = client_values
