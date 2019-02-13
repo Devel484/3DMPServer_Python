@@ -82,6 +82,7 @@ class Lobby(object):
                 all_ready = False
 
             status[slot] = client_values
+            slot += 1
 
         status["start"] = all_ready
 

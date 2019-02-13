@@ -12,7 +12,9 @@ class Server(Thread):
     PORT = 11111
     IP = '127.0.0.1'
     EXIT = False
-    CLIENT_TIMEOUT = 2000
+    CLIENT_TIMEOUT = 10 * 1000
+
+    FILTER_MESSAGES = []
 
     def __init__(self):
         """
@@ -120,6 +122,7 @@ class Server(Thread):
         nickname = client_connection.get_nickname()
         if nickname in self.client_dict:
             self.client_dict.pop(nickname)
+        client_connection.stop = True
         client_connection.client_socket.close()
 
         self.lobby.remove(client_connection)

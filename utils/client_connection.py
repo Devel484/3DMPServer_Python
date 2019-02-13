@@ -1,6 +1,7 @@
 from utils.message import Message, UnknownMessageTypeException, WrongJSONFormatException, ConnectingException
 from threading import Thread
 from socket import timeout
+import time
 
 
 class ClientConnection(Thread):
@@ -27,6 +28,7 @@ class ClientConnection(Thread):
         self.last_timestamp = None
         self.error_count = 0
         self.stop = False
+        self.status = None
         self.start()
 
     def send_message(self, message):
@@ -37,8 +39,13 @@ class ClientConnection(Thread):
         :type message: Message
         :return: None
         """
-        print("[OUT] %s" % message)
-        self.client_socket.sendall(bytes((str(message)+'\0').encode("utf-8")))
+        msg_type = message.get_type()
+        if msg_type not in self.server.FILTER_MESSAGES:
+            print("[OUT][%s]  %s" % (message.get_nickname(), message))
+        try:
+            self.client_socket.sendall(bytes((str(message)+'\0').encode("utf-8")))
+        except BrokenPipeError:
+            print("ERROR: Client(%s) broken pipe" % self.nickname)
 
     def on_message(self, msg):
         """
@@ -49,8 +56,11 @@ class ClientConnection(Thread):
         """
         try:
             message = Message(msg, self)
-            print("[IN]  %s" % message)
             msg_type = message.get_type()
+            self.last_timestamp = message.get_timestamp()
+
+            if msg_type not in self.server.FILTER_MESSAGES:
+                print("[IN][%s]  %s" % (message.get_nickname(), message))
 
             # Check for msg_type
             if self.nickname is None and msg_type == message.TYPE_CONNECT:
@@ -133,7 +143,7 @@ class ClientConnection(Thread):
         This event will be called if a timeout happens.
         :return: None
         """
-        pass
+        self.server.on_disconnect(self, "timeout")
 
     def on_gamedata(self, message):
         """
@@ -143,7 +153,6 @@ class ClientConnection(Thread):
         timestamp = message.get_timestamp()
         # Accept gamedata message only if it's a new one
         if timestamp > self.last_timestamp:
-            self.last_timestamp = timestamp
             self.server.on_gamedata(message)
 
     def on_error(self, exception):
@@ -163,12 +172,26 @@ class ClientConnection(Thread):
             self.on_disconnect("to many errors")
 
     def on_lobbydata(self, message):
+        """
+        This event will be called if lobbydata arrive.
+        :param message: Message
+        :return:
+        """
         self.server.on_lobbydata(message)
 
     def set_nickname(self, nickname):
+        """
+        Set nickname of connection.
+        :param nickname:
+        :return:
+        """
         self.nickname = nickname
 
     def get_nickname(self):
+        """
+        Get nickname of connection.
+        :return: nickname
+        """
         return self.nickname
 
     def get_status(self):
@@ -176,6 +199,21 @@ class ClientConnection(Thread):
 
     def set_status(self, status):
         self.status = status
+
+    def on_tick(self):
+        """
+        This event is frequently called to check if a timeout happened.
+        :return:
+        """
+        if not self.last_timestamp:
+            return
+        current_time = int(time.time() * 1000)
+        last_time = self.last_timestamp
+        spread = current_time - last_time
+        max_spread = self.server.CLIENT_TIMEOUT
+
+        if spread > max_spread:
+            self.on_timeout()
 
     def run(self):
         """
@@ -185,6 +223,7 @@ class ClientConnection(Thread):
         """
         received_data = ""
         while not self.server.EXIT and not self.stop:
+            self.on_tick()
             try:
                 self.client_socket.settimeout(0.2)
                 piece = str(self.client_socket.recv(4096).decode("utf-8"))
@@ -203,4 +242,6 @@ class ClientConnection(Thread):
             except timeout:
                 pass
             except ConnectionResetError:
-                pass
+                print("Resested")
+            except OSError:
+                print("OSError")
