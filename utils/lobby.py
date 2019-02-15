@@ -20,6 +20,8 @@ class LobbyClient(object):
 
 class Lobby(object):
 
+    MINIMUM_PLAYERS = 2
+
     def __init__(self):
         self.clients = {}
 
@@ -84,7 +86,7 @@ class Lobby(object):
             status[slot] = client_values
             slot += 1
 
-        status["start"] = all_ready
+        status["start"] = all_ready and len(self.clients) >= Lobby.MINIMUM_PLAYERS
 
         message = Message()
         message.set_data(status)

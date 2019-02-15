@@ -242,6 +242,6 @@ class ClientConnection(Thread):
             except timeout:
                 pass
             except ConnectionResetError:
-                print("Resested")
+                print("Reset")
             except OSError:
                 print("OSError")
