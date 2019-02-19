@@ -21,6 +21,7 @@ class LobbyClient(object):
 class Lobby(object):
 
     MINIMUM_PLAYERS = 2
+    START_TIMER = 5
 
     def __init__(self):
         self.clients = {}
@@ -43,6 +44,7 @@ class Lobby(object):
         if client.get_nickname() not in self.clients.keys():
             if "join" in data.keys() and data["join"]:
                 self.add(client)
+                self.send_lobby_init(client)
             else:
                 return
 
@@ -55,6 +57,14 @@ class Lobby(object):
             self.remove(client)
 
         self.send_lobby_status()
+
+    def send_lobby_init(self, client):
+        lobby_settings = {"start_timer": Lobby.START_TIMER, "minimum_players": Lobby.MINIMUM_PLAYERS}
+
+        message = Message()
+        message.set_data(lobby_settings)
+        message.set_type(Message.TYPE_LOBBYDATA)
+        client.send_message(message)
 
     def send_lobby_status(self):
 
