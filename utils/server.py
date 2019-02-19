@@ -13,7 +13,6 @@ class Server(Thread):
     IP = '127.0.0.1'
     EXIT = False
     CLIENT_TIMEOUT = 10 * 1000
-    SEND_MSG_WAIT_TIME = 1
 
     FILTER_MESSAGES = []
 

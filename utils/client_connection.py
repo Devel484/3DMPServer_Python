@@ -40,15 +40,6 @@ class ClientConnection(Thread):
         :type message: Message
         :return: None
         """
-        # Wait a minimum of SEND_MSG_WAIT_TIME(ms) before sending another message
-        # in order to avoid overrunning of the client
-        timestamp = int(time.time()*1000)
-        time_spread = timestamp - self.last_message_timestamp
-        if time_spread < self.server.SEND_MSG_WAIT_TIME and time_spread != timestamp:
-            time.sleep(self.server.SEND_MSG_WAIT_TIME * 0.001)
-
-        self.last_message_timestamp = timestamp
-
         msg_type = message.get_type()
         if msg_type not in self.server.FILTER_MESSAGES:
             print("[OUT][%s]  %s" % (message.get_nickname(), message))
