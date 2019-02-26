@@ -5,7 +5,7 @@ import json
 class LobbyClient(object):
 
     def __init__(self, client):
-        self.client = client
+        self.client = client    # client_connection
         self.ready = False
 
     def is_ready(self):
@@ -20,11 +20,13 @@ class LobbyClient(object):
 
 class Lobby(object):
 
-    MINIMUM_PLAYERS = 2
-    START_TIMER = 5
+    MINIMUM_PLAYERS = 1
+    START_TIMER = 2
 
-    def __init__(self):
+    def __init__(self, server, party):
+        self.server = server
         self.clients = {}
+        self.party = party
 
     def add(self, client):
         if client.get_nickname() in self.clients.keys():
@@ -96,7 +98,18 @@ class Lobby(object):
             status[slot] = client_values
             slot += 1
 
-        status["start"] = all_ready and len(self.clients) >= Lobby.MINIMUM_PLAYERS
+        if all_ready and len(self.clients) >= Lobby.MINIMUM_PLAYERS:
+            status["start"] = True
+
+            party_dict = dict()
+            for lobby_client in self.clients.values():
+                client = lobby_client.get_client()
+                party_dict[client.get_nickname()] = client
+
+            self.party.set_client_list(party_dict)
+            self.server.set_state(self.server.STATE_GAME_INIT)
+        else:
+            status["start"] = False
 
         message = Message()
         message.set_data(status)

@@ -151,10 +151,13 @@ class ClientConnection(Thread):
         This event will be called if game date was received.
         :return: None
         """
+        """
         timestamp = message.get_timestamp()
         # Accept gamedata message only if it's a new one
         if timestamp > self.last_timestamp:
             self.server.on_gamedata(message)
+        """
+        self.server.on_gamedata(message)
 
     def on_error(self, exception):
         """

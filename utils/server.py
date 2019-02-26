@@ -3,11 +3,18 @@ from utils.client_connection import ClientConnection
 from utils.message import Message
 from utils.user_interface import UserInterface
 from utils.lobby import Lobby
+from utils.party import Party
 import time
 from threading import Thread
 
 
 class Server(Thread):
+
+    # IMPORTANT !!
+    STATE_IDLE = 'idle'
+    STATE_LOBBY = 'lobby'
+    STATE_GAME_INIT = 'game_init'
+    STATE_GAME = 'game'
 
     PORT = 11111
     IP = '127.0.0.1'
@@ -30,12 +37,15 @@ class Server(Thread):
         # Dict containing all connections with nicknames
         self.client_dict = dict()
 
+        self.state = Server.STATE_IDLE
+
         # Create an INET, STREAMing socket
         self.server_socket = socket(AF_INET, SOCK_STREAM)
         # Bind the socket to a host and port
         self.server_socket.bind((self.IP, self.PORT))
 
-        self.lobby = Lobby()
+        self.party = Party(self)
+        self.lobby = Lobby(self, self.party)
         print("Socket successfully created.")
 
     def run(self):
@@ -65,18 +75,14 @@ class Server(Thread):
                 # Create a new ClientConnection
                 ClientConnection(self, client_socket)
 
-    def on_gamedata(self, client_connection, message):
+    def on_gamedata(self, message):
         """
         This function handels messages containing game-relevant data.
-        :param client_connection: client connection of sender
-        :type client_connection: ClientConnection
         :param message: message object
         :type message: Message
         :return: None
         """
-        for client in self.client_dict:
-            if client != client_connection:
-                client.send_message(message)
+        self.party.on_gamedata(message)
 
     def send_gamedata(self):
         """
@@ -153,3 +159,10 @@ class Server(Thread):
 
     def get_client_dict(self):
         return self.client_dict
+
+    def set_state(self, state):
+        self.state = state
+
+    def get_state(self):
+        return self.state
+
