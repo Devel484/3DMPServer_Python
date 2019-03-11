@@ -20,8 +20,8 @@ class LobbyClient(object):
 
 class Lobby(object):
 
-    MINIMUM_PLAYERS = 1
-    START_TIMER = 2
+    MINIMUM_PLAYERS = 2
+    START_TIMER = 5
 
     def __init__(self, server, party):
         self.server = server

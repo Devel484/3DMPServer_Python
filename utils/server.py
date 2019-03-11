@@ -17,7 +17,7 @@ class Server(Thread):
     STATE_GAME = 'game'
 
     PORT = 11111
-    IP = '127.0.0.1'
+    IP = '192.168.137.154'
     EXIT = False
     CLIENT_TIMEOUT = 10 * 1000
 
